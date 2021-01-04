@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"path/filepath"
 
 	"muzzammil.xyz/jsonc"
 )
@@ -30,6 +31,8 @@ func (tm TemplatesMaster) HasTemplateWithName(name string) bool {
 }
 
 func (tm TemplatesMaster) HasTemplateForFile(filename string) bool {
+	var extension = filepath.Ext(filename)
+	filename = filename[0 : len(filename)-len(extension)]
 	for i := 0; i < len(tm.Templates); i++ {
 		if tm.Templates[i].Filename == filename {
 			return true
