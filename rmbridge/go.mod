@@ -1,4 +1,4 @@
-module github.com/floAr/reMarkableGo/rmbridge
+module github.com/floar/remarkablego/rmbridge
 
 go 1.15
 
