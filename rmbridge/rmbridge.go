@@ -96,3 +96,10 @@ func ConnectUSB(passphrase string) bool {
 func ConnectWifi(passphrase string, ipAdress string) bool {
 	return connect(passphrase, ipAdress)
 }
+
+// Disconnect ends a possible connection to the remarkable
+func Disconnect() {
+	if client != nil {
+		defer client.Close()
+	}
+}
