@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
+	"os"
 	"path/filepath"
 
 	"muzzammil.xyz/jsonc"
@@ -44,6 +46,22 @@ func (tm TemplatesMaster) HasTemplateForFile(filename string) bool {
 func (tm TemplatesMaster) Append(newTemplate Template) TemplatesMaster {
 	tm.Templates = append(tm.Templates, newTemplate)
 	return tm
+}
+
+func (tm TemplatesMaster) Save(templatesFile string) {
+	res, err := json.Marshal(tm)
+	if err != nil {
+		log.Fatal(err)
+	}
+	file, err := os.Create(templatesFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	_, err = file.Write(res)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func LoadTemplateMaster(templatesFile string) TemplatesMaster {
