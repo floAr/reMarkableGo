@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/melbahja/goph"
@@ -14,6 +15,17 @@ import (
 )
 
 var client *goph.Client
+
+type RMPath string
+
+const (
+	TemplateFolder RMPath = "/usr/share/remarkable/templates"
+	TemplateMaster        = "/usr/share/remarkable/templates/templates.json"
+)
+
+func GetClient() *goph.Client {
+	return client
+}
 
 func askIsHostTrusted(host string, key ssh.PublicKey) bool {
 
@@ -30,6 +42,7 @@ func askIsHostTrusted(host string, key ssh.PublicKey) bool {
 
 	return strings.ToLower(strings.TrimSpace(a)) == "yes"
 }
+
 func verifyHost(host string, remote net.Addr, key ssh.PublicKey) error {
 
 	//
@@ -64,6 +77,10 @@ func verifyHost(host string, remote net.Addr, key ssh.PublicKey) error {
 
 	// Add the new host to known hosts file.
 	return goph.AddKnownHost(host, remote, key, "")
+}
+
+func isConnected() bool {
+	return client != nil
 }
 
 // Connect will try to establish a connection to the reMarkable
@@ -101,5 +118,31 @@ func ConnectWifi(passphrase string, ipAdress string) bool {
 func Disconnect() {
 	if client != nil {
 		defer client.Close()
+	}
+}
+
+// Download will fetch a list of file on the remarkable and download them into the local folder
+func Download(remoteFiles []string, localFolder string) {
+	for i := 0; i < len(remoteFiles); i++ {
+		file := remoteFiles[i]
+		println("downloading " + file + " to " + filepath.Join(localFolder, filepath.Base(file)))
+		err := client.Download(file, filepath.Join(localFolder, filepath.Base(file)))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+}
+
+// Upload will upload a list of local files into the specific folder on the remarkable
+func Upload(localFiles []string, remoteFolder RMPath) {
+	for i := 0; i < len(localFiles); i++ {
+		file := localFiles[i]
+		remotePath := strings.Join([]string{string(remoteFolder), filepath.Base(file)}, "/")
+		println("uploading " + file + " to " + remotePath)
+
+		err := client.Upload(file, remotePath)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
